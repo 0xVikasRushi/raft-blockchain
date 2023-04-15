@@ -59,7 +59,7 @@ export class RaftNode {
           heartBeatFrom: this.id,
         });
       });
-      Promise.all(promises).then(() => {
+      Promise.allSettled(promises).then(() => {
         console.log("HeartBeat SENT");
       });
     }, 1000);
@@ -71,9 +71,8 @@ export class RaftNode {
     this.currentTerm++;
     this.votedFor = this.id;
     const promises = this.peer.map((p) => {
+      console.log("sent to " + p);
       return axios.post(`http://localhost:${p}/requestVote`, {
-        from: this.id,
-        to: p,
         term: this.currentTerm,
         candidateId: this.id,
         lastLogIndex: this.log.length - 1,
@@ -81,26 +80,23 @@ export class RaftNode {
       });
     });
 
-    Promise.all(promises)
-      .then((results) => {
-        const res = results.map((r) => r.data);
-        console.log(res);
+    const results = await Promise.allSettled(promises);
+    const filtered = results.filter((p) => p.status !== "rejected");
+    const res = filtered.map((res) => {
+      const res_ = res as any;
+      const val = res_.value as any;
+      console.log(val.data, typeof val.data);
+      return val.data;
+    });
+    const votes = countVotes(res);
+    console.log(votes);
+    if (votes.trueCount > votes.falseCount) {
+      this.type = NodeType.leader;
+    }
+    if ((this.type = NodeType.leader)) {
+      this.sendHeartBeats();
+    }
 
-        const votes = countVotes(res);
-        console.log(votes);
-
-        if (votes.trueCount > votes.falseCount) {
-          this.type = NodeType.leader;
-        }
-        if ((this.type = NodeType.leader)) {
-          this.sendHeartBeats();
-        }
-      })
-      .catch((error) => {
-        console.log(error.response?.data);
-        console.log(error.response?.status);
-        console.log(error.response?.headers);
-      });
     // await this.sendHeartBeats();
     // asks for votes
     // ...
