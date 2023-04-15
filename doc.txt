@@ -1,3 +1,0 @@
-// timeout all
-candidate with post message in group "im a candidate"
-// handler candiate message
