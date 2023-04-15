@@ -104,9 +104,14 @@ app.post("/executeCommand", async (req, res) => {
     });
 
     const response = (await Promise.allSettled(promises)) as any;
+
+    response.map((k: any) => {
+      k.value?.data !== undefined, console.log(k.value?.data);
+    });
+
     console.log(response.value?.data);
 
-    return res.send(command);
+    return res.send(raftNode.log);
   } catch (error) {
     console.log(error);
     return res.status(404).json({ error: error });
