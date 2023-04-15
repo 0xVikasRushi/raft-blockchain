@@ -35,7 +35,9 @@ export class RaftNode {
     this.currentTerm = 0;
     this.log = [];
     this.type = NodeType.follower;
-    this.peer = ["3001", "3002", "3003", "3004"].filter((p) => p !== this.id);
+    this.peer = ["3001", "3002", "3003", "3004", "3005"].filter(
+      (p) => p !== this.id
+    );
 
     this.timer.start(getTimeout());
     console.log(this.timer.randTime);
@@ -48,7 +50,6 @@ export class RaftNode {
 
     // becomes candidate
     this.type = NodeType.candidate;
-
     this.votingProcedure();
   }
 
@@ -90,7 +91,10 @@ export class RaftNode {
     });
     const votes = countVotes(res);
     console.log(votes);
-    if (votes.trueCount > votes.falseCount) {
+    if (
+      this.type === NodeType.candidate &&
+      votes.trueCount + 1 > Math.floor(this.peer.length / 2)
+    ) {
       this.type = NodeType.leader;
     }
     if ((this.type = NodeType.leader)) {

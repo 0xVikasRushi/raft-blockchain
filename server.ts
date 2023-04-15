@@ -24,7 +24,11 @@ app.post("/requestVote", async (req, res) => {
     if (term < raftNode.currentTerm) {
       return res.json({ term: term, voteGranted: false });
     }
-    return res.json({ term: term, voteGranted: true });
+    if (
+      raftNode.votedFor === null ||
+      raftNode.votedFor === candidateId /* TODO: another condition */
+    )
+      return res.json({ term: term, voteGranted: true });
   } catch (error) {
     res.status(404).json({ error: error });
   }
