@@ -11,7 +11,7 @@ interface LogEntry {
   command: string;
 }
 
-enum NodeType {
+export enum NodeType {
   follower = "follower",
   candidate = "candidate",
   leader = "leader",
@@ -24,10 +24,11 @@ export class RaftNode {
   log: LogEntry[];
   type: NodeType;
   peer: string[];
+  commitIndex: number;
 
   //  -----
   timer: Timer;
-
+  leader: RaftNode | null;
   constructor(id: string) {
     this.timer = new Timer();
     this.id = id;
@@ -38,6 +39,8 @@ export class RaftNode {
     this.peer = ["3001", "3002", "3003", "3004", "3005"].filter(
       (p) => p !== this.id
     );
+    this.leader = null;
+    this.commitIndex = 0;
 
     this.timer.start(getTimeout());
     console.log(this.timer.randTime);
@@ -56,8 +59,13 @@ export class RaftNode {
   async sendHeartBeats() {
     setInterval(() => {
       const promises = this.peer.map((p) => {
-        return axios.post(`http://localhost:${p}/heartBeats`, {
-          heartBeatFrom: this.id,
+        return axios.post(`http://localhost:${p}/appendEntries`, {
+          from: this.id,
+          term: this.currentTerm,
+          leaderId: this.id,
+          prevLogTerm: this.log[this.log.length - 1]?.term,
+          entries: [],
+          leaderCommit: this.commitIndex,
         });
       });
       Promise.allSettled(promises).then(() => {
