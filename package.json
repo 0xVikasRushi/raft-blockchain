@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "nodemon server.js 3000",
     "node_1": "nodemon server.js 3001",
     "node_2": "nodemon server.js 3002",
     "node_3": "nodemon server.js 3003",
