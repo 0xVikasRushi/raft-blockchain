@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getTimeout } from "./utils";
+import { getTimeout, countTrue, countVotes } from "./utils";
 
 export enum MessageType {
   gatherVotes = "gatherVotes",
@@ -40,6 +40,20 @@ export class RaftNode {
     clearTimeout(this.timeoutId);
   }
 
+  async sendHeartBeats() {
+    setInterval(() => {
+      // console.log("here");
+      const promises = this.peer.map((p) => {
+        return axios.post(`http://localhost:${p}/heartBeats`, {
+          heartBeatFrom: this.id,
+        });
+      });
+      Promise.all(promises).then(() => {
+        console.log("HeartBeat SENT");
+      });
+    }, 5000);
+  }
+
   async votingProcedure() {
     this.currentTerm++;
     this.votedFor = this.id;
@@ -60,10 +74,23 @@ export class RaftNode {
         });
       });
 
-      Promise.all(promises).then((res) => {
-        console.log(res.map((r) => r.data));
+      Promise.all(promises).then((results) => {
+        const res = results.map((r) => r.data);
+        console.log(res);
+
+        const votes = countVotes(res);
+        console.log(votes);
+
+        if (votes.trueCount > votes.falseCount) {
+          this.type = NodeType.leader;
+        }
+        if ((this.type = NodeType.leader)) {
+          this.sendHeartBeats();
+        }
       });
     }, timeout);
+
+    // await this.sendHeartBeats();
     // asks for votes
     // ...
     // becomes leader

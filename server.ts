@@ -28,6 +28,13 @@ app.post("/requestVote", async (req, res) => {
     res.status(404).json({ error: error });
   }
 });
+
+app.post("/heartBeats", async (req, res) => {
+  const { heartBeatFrom } = req.body;
+  console.log(`Received HeartBeat from ID ${heartBeatFrom}`)
+  res.json({ message: `Received HeartBeat from ID ${heartBeatFrom}` });
+});
+
 app.post("/appendEntries", async (req, res) => {
   try {
     const {
