@@ -1,5 +1,7 @@
 import express from "express";
 import { MessageType, RaftNode } from "./raft-node";
+import { Timer } from "./timer";
+import { getTimeout } from "./utils";
 
 const app = express();
 app.use(express.json());
@@ -9,7 +11,6 @@ console.log(typeof PORT);
 const nodeId = PORT;
 
 const raftNode = new RaftNode(nodeId);
-raftNode.votingProcedure();
 
 // TODO TRY CATCH VALIDATION
 app.get("/", function (req, res) {
@@ -19,7 +20,7 @@ app.get("/", function (req, res) {
 app.post("/requestVote", async (req, res) => {
   try {
     const { term, candidateId, lastLogIndex, lastLogTerm } = req.body;
-    raftNode.clearTimeoutVoting();
+    raftNode.timer.stop();
     if (term < raftNode.currentTerm) {
       return res.json({ term: term, voteGranted: false });
     }
@@ -31,7 +32,8 @@ app.post("/requestVote", async (req, res) => {
 
 app.post("/heartBeats", async (req, res) => {
   const { heartBeatFrom } = req.body;
-  console.log(`Received HeartBeat from ID ${heartBeatFrom}`)
+  console.log(`Received HeartBeat from ID ${heartBeatFrom}`);
+  raftNode.timer.reset();
   res.json({ message: `Received HeartBeat from ID ${heartBeatFrom}` });
 });
 
