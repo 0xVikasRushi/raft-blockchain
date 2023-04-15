@@ -1,11 +1,13 @@
 import axios from "axios";
-import { PubSub } from "./pubSub";
-import { pubsub } from "./server";
 import { getTimeout } from "./utils";
 
-
 export enum MessageType {
-  iamCandidate = "iamCandidate",
+  gatherVotes = "gatherVotes",
+}
+
+interface LogEntry {
+  term: number;
+  command: string;
 }
 
 enum NodeType {
@@ -18,13 +20,12 @@ export class RaftNode {
   id: string;
   currentTerm: number;
   votedFor: string | null;
-  log: any[];
+  log: LogEntry[];
   type: NodeType;
   peer: string[];
 
-
   //  -----
-  timeoutId: any
+  timeoutId: any;
 
   constructor(id: string) {
     this.id = id;
@@ -40,6 +41,8 @@ export class RaftNode {
   }
 
   async votingProcedure() {
+    this.currentTerm++;
+    this.votedFor = this.id;
     // there's a time out
     const timeout = getTimeout();
     console.log({ timeout });
@@ -49,9 +52,11 @@ export class RaftNode {
       // becomes candidate
       this.type = NodeType.candidate;
       const promises = this.peer.map((p) => {
-        return axios.post(`http://localhost:${p}/message`, {
-          from: this.id,
-          message: MessageType.iamCandidate,
+        return axios.post(`http://localhost:${p}/requestVote`, {
+          term: this.currentTerm,
+          candidateId: this.id,
+          lastLogIndex: this.log.length - 1,
+          lastLogTerm: this.log[this.log.length - 1]?.term,
         });
       });
 

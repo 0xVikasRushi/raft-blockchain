@@ -1,7 +1,5 @@
-import { v4 as uuidv4 } from "uuid";
 import express from "express";
 import { MessageType, RaftNode } from "./raft-node";
-import { PubSub } from "./pubSub";
 
 const app = express();
 app.use(express.json());
@@ -9,7 +7,7 @@ app.use(express.json());
 const PORT = process.argv[2];
 console.log(typeof PORT);
 const nodeId = PORT;
-export const pubsub = new PubSub();
+
 const raftNode = new RaftNode(nodeId);
 raftNode.votingProcedure();
 
@@ -18,10 +16,14 @@ app.get("/", function (req, res) {
   res.send("working");
 });
 
-app.post("/requestvote", async (req, res) => {
+app.post("/requestVote", async (req, res) => {
   try {
     const { term, candidateId, lastLogIndex, lastLogTerm } = req.body;
-    res.json({ term: term, voteGranted: true });
+    raftNode.clearTimeoutVoting();
+    if (term < raftNode.currentTerm) {
+      return res.json({ term: term, voteGranted: false });
+    }
+    return res.json({ term: term, voteGranted: true });
   } catch (error) {
     res.status(404).json({ error: error });
   }
@@ -41,15 +43,6 @@ app.post("/appendEntries", async (req, res) => {
   } catch (error) {
     res.status(404).json({ error: error });
   }
-});
-
-app.post("/message", async (req, res) => {
-  const { message } = req.body;
-  if (message === MessageType.iamCandidate) {
-    raftNode.clearTimeoutVoting();
-  }
-
-  res.json(req.body);
 });
 
 app.post("/executeCommand", async (req, res) => {
