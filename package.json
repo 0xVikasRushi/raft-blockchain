@@ -4,7 +4,6 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "start": "nodemon server.ts",
     "node_1": "nodemon server.ts 3001",
     "node_2": "nodemon server.ts 3002",
     "node_3": "nodemon server.ts 3003",
