@@ -1,0 +1,22 @@
+{
+  "name": "raft-nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "node_1": "nodemon server.js 3001",
+    "node_2": "nodemon server.js 3002",
+    "node_3": "nodemon server.js 3003",
+    "node_4": "nodemon server.js 3004",
+    "node_5": "nodemon server.js 3005"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.22"
+  }
+}
