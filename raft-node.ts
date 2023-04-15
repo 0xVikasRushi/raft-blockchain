@@ -3,6 +3,11 @@ import { PubSub } from "./pubSub";
 import { pubsub } from "./server";
 import { getTimeout } from "./utils";
 
+
+export enum MessageType {
+  iamCandidate = "iamCandidate",
+}
+
 enum NodeType {
   follower = "follower",
   candidate = "candidate",
@@ -17,6 +22,10 @@ export class RaftNode {
   type: NodeType;
   peer: string[];
 
+
+  //  -----
+  timeoutId: any
+
   constructor(id: string) {
     this.id = id;
     this.votedFor = null;
@@ -26,20 +35,23 @@ export class RaftNode {
     this.peer = ["3001", "3002", "3003", "3004"].filter((p) => p !== this.id);
   }
 
+  clearTimeoutVoting() {
+    clearTimeout(this.timeoutId);
+  }
+
   async votingProcedure() {
     // there's a time out
     const timeout = getTimeout();
     console.log({ timeout });
-    setTimeout(() => {
+    this.timeoutId = setTimeout(() => {
       // after timeout
 
       // becomes candidate
-
-      // const promise = await axios.post()
+      this.type = NodeType.candidate;
       const promises = this.peer.map((p) => {
         return axios.post(`http://localhost:${p}/message`, {
           from: this.id,
-          message: "candidate",
+          message: MessageType.iamCandidate,
         });
       });
 
