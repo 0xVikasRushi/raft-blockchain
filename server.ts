@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import express from "express";
-import { RaftNode } from "./raft-node";
+import { MessageType, RaftNode } from "./raft-node";
 import { PubSub } from "./pubSub";
 
 const app = express();
@@ -45,7 +45,10 @@ app.post("/appendEntries", async (req, res) => {
 
 app.post("/message", async (req, res) => {
   const { message } = req.body;
-  
+  if (message === MessageType.iamCandidate) {
+    raftNode.clearTimeoutVoting();
+  }
+
   res.json(req.body);
 });
 
