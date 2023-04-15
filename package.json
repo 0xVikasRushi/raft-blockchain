@@ -2,24 +2,29 @@
   "name": "raft-nodejs",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
-  "type": "module",
+  "main": "server.ts",
   "scripts": {
-    "start": "nodemon server.js",
-    "node_1": "nodemon server.js 3001",
-    "node_2": "nodemon server.js 3002",
-    "node_3": "nodemon server.js 3003",
-    "node_4": "nodemon server.js 3004",
-    "node_5": "nodemon server.js 3005"
+    "start": "nodemon server.ts",
+    "node_1": "nodemon server.ts 3001",
+    "node_2": "nodemon server.ts 3002",
+    "node_3": "nodemon server.ts 3003",
+    "node_4": "nodemon server.ts 3004",
+    "node_5": "nodemon server.ts 3005"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^4.17.17",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "nodemon": "^2.0.22",
-    "redis": "^2.8.0",
+    "redis": "^4.6.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.1"
   }
 }

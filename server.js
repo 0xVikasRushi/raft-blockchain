@@ -1,28 +1,29 @@
-import express from "express";
-import RaftNode from "./raftNode.js";
-import { v4 as uuidv4 } from "uuid";
-import getTimeout from "./utils.js";
-import { PubSub } from "./pubSub.js";
-
-const nodeAddress = uuidv4().split("-").join("");
+// import express from "express";
+const express = require("express");
 
 const app = express();
-const pubsub = new PubSub();
 
-const port = process.argv[2];
+const port = 3000;
 
 app.use(express.json());
 
-const timeout = getTimeout();
-console.log(timeout);
-const b1 = new RaftNode("1" + nodeAddress);
-setTimeout(() => {
-  b1.type = "candidate";
-  pubsub.publish({
-    channel: "BLOCKCHAIN",
-    message: nodeAddress + "IM A LEADER",
-  });
-}, timeout);
+
+app.post('/requestvote',async(req,res)=>{
+  try {
+    const { term , candidateId , lastLogIndex ,lastLogTerm } = req.body;
+    res.json({term:term,voteGranted:true})
+  } catch (error) {
+    res.status(404).json({error:error})
+  }
+})
+app.post('/appendEntries',async(req,res)=>{
+  try {
+    const { term , leaderId , prevLogIndex ,prevLogTerm , entries:{term:term1 , command:command1} ,leaderCommit  } = req.body;
+    res.json({term:term,success:true})
+  } catch (error) {
+    res.status(404).json({error:error})
+  }
+})
 
 app.get("/", function (req, res) {
   res.send("working ");
