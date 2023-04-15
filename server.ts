@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.argv[2];
+console.log(typeof PORT);
 const nodeId = PORT;
 export const pubsub = new PubSub();
 const raftNode = new RaftNode(nodeId);
@@ -40,6 +41,12 @@ app.post("/appendEntries", async (req, res) => {
   } catch (error) {
     res.status(404).json({ error: error });
   }
+});
+
+app.post("/message", async (req, res) => {
+  const { message } = req.body;
+  
+  res.json(req.body);
 });
 
 app.post("/executeCommand", async (req, res) => {
