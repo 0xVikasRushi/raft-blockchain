@@ -33,6 +33,7 @@ app.post("/requestVote", async (req, res) => {
 app.post("/heartBeats", async (req, res) => {
   const { heartBeatFrom } = req.body;
   console.log(`Received HeartBeat from ID ${heartBeatFrom}`);
+  raftNode.timer.reset();
   res.json({ message: `Received HeartBeat from ID ${heartBeatFrom}` });
 });
 

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { getTimeout, countTrue, countVotes } from "./utils";
 import { Timer } from "./timer";
 
@@ -54,7 +54,6 @@ export class RaftNode {
 
   async sendHeartBeats() {
     setInterval(() => {
-      // console.log("here");
       const promises = this.peer.map((p) => {
         return axios.post(`http://localhost:${p}/heartBeats`, {
           heartBeatFrom: this.id,
@@ -63,14 +62,18 @@ export class RaftNode {
       Promise.all(promises).then(() => {
         console.log("HeartBeat SENT");
       });
-    }, 5000);
+    }, 1000);
   }
 
   async votingProcedure() {
+    console.log(`Voting process started by ${this.id}`);
+
     this.currentTerm++;
     this.votedFor = this.id;
     const promises = this.peer.map((p) => {
       return axios.post(`http://localhost:${p}/requestVote`, {
+        from: this.id,
+        to: p,
         term: this.currentTerm,
         candidateId: this.id,
         lastLogIndex: this.log.length - 1,
@@ -78,20 +81,26 @@ export class RaftNode {
       });
     });
 
-    Promise.all(promises).then((results) => {
-      const res = results.map((r) => r.data);
-      console.log(res);
+    Promise.all(promises)
+      .then((results) => {
+        const res = results.map((r) => r.data);
+        console.log(res);
 
-      const votes = countVotes(res);
-      console.log(votes);
+        const votes = countVotes(res);
+        console.log(votes);
 
-      if (votes.trueCount > votes.falseCount) {
-        this.type = NodeType.leader;
-      }
-      if ((this.type = NodeType.leader)) {
-        this.sendHeartBeats();
-      }
-    });
+        if (votes.trueCount > votes.falseCount) {
+          this.type = NodeType.leader;
+        }
+        if ((this.type = NodeType.leader)) {
+          this.sendHeartBeats();
+        }
+      })
+      .catch((error) => {
+        console.log(error.response?.data);
+        console.log(error.response?.status);
+        console.log(error.response?.headers);
+      });
     // await this.sendHeartBeats();
     // asks for votes
     // ...
