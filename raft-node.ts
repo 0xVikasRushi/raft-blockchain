@@ -29,6 +29,7 @@ export class RaftNode {
   //  -----
   timer: Timer;
   leader: RaftNode | null;
+  state: number[];
   constructor(id: string) {
     this.timer = new Timer();
     this.id = id;
@@ -41,6 +42,7 @@ export class RaftNode {
     );
     this.leader = null;
     this.commitIndex = 0;
+    this.state = [0, 0, 0, 0];
 
     this.timer.start(getTimeout());
     console.log(this.timer.randTime);

@@ -37,6 +37,36 @@ app.post("/requestVote", async (req, res) => {
 //   const { heartBeatFrom } = req.body;
 // });
 
+function exc(str: string) {
+  const cmd: any = str.split(" ");
+  if (cmd[0] === "SET") {
+    raftNode.state[parseInt(cmd[1])] = parseInt(cmd[2]);
+  } else {
+    switch (cmd[0]) {
+      case "ADD":
+        raftNode.state[parseInt(cmd[1])] =
+          raftNode.state[parseInt(cmd[2])] + raftNode.state[parseInt(cmd[3])];
+        break;
+
+      case "SUB":
+        raftNode.state[parseInt(cmd[1])] =
+          raftNode.state[parseInt(cmd[2])] - raftNode.state[parseInt(cmd[3])];
+        break;
+      case "MUL":
+        raftNode.state[parseInt(cmd[1])] =
+          raftNode.state[parseInt(cmd[2])] * raftNode.state[parseInt(cmd[3])];
+        break;
+      case "DIV":
+        raftNode.state[parseInt(cmd[1])] =
+          raftNode.state[parseInt(cmd[2])] / raftNode.state[parseInt(cmd[3])];
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
 app.post("/appendEntries", async (req, res) => {
   try {
     const {
@@ -55,6 +85,13 @@ app.post("/appendEntries", async (req, res) => {
       raftNode.timer.reset();
     } else {
       console.log("not heartbeat", entries);
+      console.log("state before: ", raftNode.state);
+      entries
+        .map((e: any) => e.command)
+        .forEach((c: any) => {
+          exc(c);
+        });
+      console.log("state after:  ", raftNode.state);
 
       if (raftNode.type === NodeType.candidate) {
         raftNode.type = NodeType.follower;
@@ -65,6 +102,7 @@ app.post("/appendEntries", async (req, res) => {
       if (raftNode.log[prevLogIndex]?.term !== prevLogTerm) {
         return res.json({ term: term, success: false });
       }
+
       // TODO: 3
       // TODO: 4
       if (leaderCommit > raftNode.commitIndex) {
