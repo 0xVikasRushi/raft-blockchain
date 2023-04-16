@@ -147,7 +147,7 @@ app.post("/executeCommand", async (req, res) => {
       k.value?.data !== undefined, console.log(k.value?.data);
     });
 
-    console.log(response.value?.data);
+    // console.log(response.value?.data);
 
     return res.send(raftNode.log);
   } catch (error) {
