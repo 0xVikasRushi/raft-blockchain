@@ -1,14 +1,10 @@
-import axios, { AxiosError } from "axios";
-import { getTimeout, countTrue, countVotes } from "./utils";
+import axios from "axios";
 import { Timer } from "./timer";
+import { LogEntry } from "./types";
+import { countVotes, getTimeout } from "./utils";
 
 export enum MessageType {
   gatherVotes = "gatherVotes",
-}
-
-interface LogEntry {
-  term: number;
-  command: string;
 }
 
 export enum NodeType {
@@ -28,7 +24,7 @@ export class RaftNode {
 
   //  -----
   timer: Timer;
-  leader: RaftNode | null;
+  leader: RaftNode["id"] | null;
   state: number[];
   constructor(id: string) {
     this.timer = new Timer();
@@ -45,7 +41,7 @@ export class RaftNode {
     this.state = [0, 0, 0, 0];
 
     this.timer.start(getTimeout());
-    console.log(this.timer.randTime);
+    console.log(`Timeout for node ${this.id}: ${this.timer.randTime}`);
 
     this.timer.on("timeout", this.handleTimeout.bind(this));
   }
@@ -110,10 +106,5 @@ export class RaftNode {
     if ((this.type = NodeType.leader)) {
       this.sendHeartBeats();
     }
-
-    // await this.sendHeartBeats();
-    // asks for votes
-    // ...
-    // becomes leader
   }
 }

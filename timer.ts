@@ -2,7 +2,7 @@ import EventEmitter from "events";
 
 export class Timer extends EventEmitter {
   timerId: any;
-  randTime: number = 0;
+  randTime = 0;
 
   constructor() {
     super();
